@@ -14,6 +14,9 @@ PostgresLogin = {
         'db': os.getenv('DB_DB', 'url_short')
         }
 
+# Domain to function on
+host = os.getenv('HOST', 'https://alpha-v.cf')
+
 db = SQLAlchemy()
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(username)s:%(password)s@%(host)s:%(port)s/%(db)s' % PostgresLogin
 db.init_app(app)
@@ -51,7 +54,7 @@ def shortenUrl():
         short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
         db.session.add(short)
         db.session.commit()
-        return "Shortened: {}".format(shortCode)
+        return "Shortened: {}/{}".format(host, shortCode)
     # Error return
     except:
         return "An error occured while shortening your URL! Please try again later."
