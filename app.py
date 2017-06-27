@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 import os
+import uuid
+
 app = Flask(__name__)
 
 # Grab the environment variables contianing PostgreSQL details & store them in a dict
@@ -19,6 +21,11 @@ db.init_app(app)
 class ShortenedUrl(db.Model):
     """Stores a shortened URL"""
     __tablename__ = 'urls'
+    
+    # Default constructor
+    def __init__(self, short_code, full_url):
+        self.short_code = short_code
+        self.full_url = full_url
 
     id = db.Column(db.Integer, primary_key=True)
     short_code = db.Column(db.Text)
@@ -35,4 +42,12 @@ def index():
 
 @app.route('/', methods=['POST', 'PUT'])
 def shortenUrl():
-    return "TODO"
+    # Attempt to generate a unique id (really low chance of collisions, so don't care about the odd error). TODO check out namespaces
+    shortCode = str(uuid.uuid4()).replace('-', '')
+    # Create a new shortened url
+    short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
+    db.session.add(short)
+    db.session.commit()
+
+#    except:
+#        return "An error occured while shortening your URL! Please try again later."
