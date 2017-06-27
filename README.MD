@@ -15,3 +15,6 @@
 
 ### Environment Variables
 #### Will follow soonTM!
+
+
+## Please note that this was a fun "cuz I'm bored" project. I'm not a web-dev & this code has a collision (error) rate of ~2/thousand.
