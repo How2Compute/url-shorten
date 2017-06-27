@@ -8,3 +8,4 @@ flask_sqlalchemy
 ### End Of Default Requirements ###
 
 ### Your Requirements Below This Line ###
+psycopg2
