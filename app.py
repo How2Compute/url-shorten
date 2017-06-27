@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
 import os
 import uuid
@@ -31,6 +31,7 @@ class ShortenedUrl(db.Model):
     short_code = db.Column(db.Text)
     full_url = db.Column(db.Text)
 
+# Homepage route
 @app.route("/")
 def index():
     results = ShortenedUrl.query.all()
@@ -40,14 +41,30 @@ def index():
 
     return render_template('index.html')
 
+# Shorten link route
 @app.route('/', methods=['POST', 'PUT'])
 def shortenUrl():
-    # Attempt to generate a unique id (really low chance of collisions, so don't care about the odd error). TODO check out namespaces
-    shortCode = str(uuid.uuid4()).replace('-', '')
-    # Create a new shortened url
-    short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
-    db.session.add(short)
-    db.session.commit()
+    try:
+        # Attempt to generate a unique id (really low chance of collisions, so don't care about the odd error). TODO check out namespaces
+        shortCode = str(uuid.uuid4()).replace('-', '')
+        # Create a new shortened url
+        short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
+        db.session.add(short)
+        db.session.commit()
 
-#    except:
-#        return "An error occured while shortening your URL! Please try again later."
+    # Error return
+    except:
+        return "An error occured while shortening your URL! Please try again later."
+
+@app.route("/<path>")
+def followShort(path):
+#    try:
+        # Return a 302 redirect (TODO consider using 301 in the future)
+    urlObj = ShortenedUrl.query.filter_by(short_code=str(path)).first()
+    if urlObj:
+        url = urlObj.full_url
+        print(url)
+        print(path)
+        return redirect(url, code=301)
+    else:
+        return "Couldn't find that shortcode!"
