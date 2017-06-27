@@ -46,25 +46,23 @@ def index():
 def shortenUrl():
     try:
         # Attempt to generate a unique id (really low chance of collisions, so don't care about the odd error). TODO check out namespaces
-        shortCode = str(uuid.uuid4()).replace('-', '')
+        shortCode = str(uuid.uuid4()).replace('-', '')[:10]
         # Create a new shortened url
         short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
         db.session.add(short)
         db.session.commit()
-
+        return "Shortened: {}".format(shortCode)
     # Error return
     except:
         return "An error occured while shortening your URL! Please try again later."
 
+# Redirect using shortcode
 @app.route("/<path>")
 def followShort(path):
-#    try:
-        # Return a 302 redirect (TODO consider using 301 in the future)
+    # Attempt to find the shortcode & if found, redirect the user
     urlObj = ShortenedUrl.query.filter_by(short_code=str(path)).first()
     if urlObj:
         url = urlObj.full_url
-        print(url)
-        print(path)
         return redirect(url, code=301)
     else:
         return "Couldn't find that shortcode!"
