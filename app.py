@@ -49,11 +49,27 @@ def index():
 def shortenUrl():
     try:
         # Attempt to generate a unique id (really low chance of collisions, so don't care about the odd error). TODO check out namespaces
-        shortCode = str(uuid.uuid4()).replace('-', '')[:10]
+        shortCode = str(uuid.uuid4()).replace('-', '')[:5]
         # Create a new shortened url
         short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
         db.session.add(short)
         db.session.commit()
+        
+        # Get the more visually pleasing shortcode (without http/https)
+        short_url = host+'/'+shortCode
+        try:
+            short_url = short_url.remove('http://')
+        except:
+            # Do nothing
+            pass
+
+        try:
+            short_url = short_url.remove('https://')
+        except:
+            # Do nothing
+            pass
+
+        return render_template('shortened.html', short_url_link=host+'/'+shortCode, short_url=short_url)
         return "Shortened: {}/{}".format(host, shortCode)
     # Error return
     except:
