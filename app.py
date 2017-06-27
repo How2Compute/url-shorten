@@ -50,8 +50,15 @@ def shortenUrl():
     try:
         # Attempt to generate a unique id (really low chance of collisions, so don't care about the odd error). TODO check out namespaces
         shortCode = str(uuid.uuid4()).replace('-', '')[:5]
+        
+        # Add http:// to the long url if it wasen't found (to fix any redirect issues that may occur
+        long_url = request.form.get('url', 'https://localhost')
+        if not ("http://" in long_url or "https://" in long_url):
+            # Use http:// as most https:// websites will have a rewrite in place
+            long_url = "http://" + long_url
+
         # Create a new shortened url
-        short = ShortenedUrl(shortCode, request.form.get('url', 'https://localhost'))
+        short = ShortenedUrl(shortCode, long_url)
         db.session.add(short)
         db.session.commit()
         
